@@ -1,4 +1,4 @@
-package com.example.navigationlab
+package com.example.navigationlab.navigation
 
 object Routes {
     const val HOME = "home"
