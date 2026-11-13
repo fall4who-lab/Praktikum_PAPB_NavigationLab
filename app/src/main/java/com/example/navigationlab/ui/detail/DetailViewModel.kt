@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.navigationlab.data.repository.StudentRepository
 
-
 class DetailViewModel(
     private val repository: StudentRepository
 ) : ViewModel() {
@@ -16,11 +15,17 @@ class DetailViewModel(
         private set
 
     fun loadStudent(id: Int) {
-        val student = repository.getStudentById(id)
-        uiState = if (student != null) {
-            DetailUiState(student = student)
-        } else {
-            DetailUiState(errorMessage = "Student tidak ditemukan")
+        uiState = uiState.copy(isLoading = true, errorMessage = null)
+        repository.getStudent(id) { result ->
+            result
+                .onSuccess { student ->
+                    uiState = DetailUiState(student = student)
+                }
+                .onFailure { error ->
+                    uiState = DetailUiState(
+                        errorMessage = error.message ?: "Data tidak tersedia"
+                    )
+                }
         }
     }
 

@@ -9,8 +9,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.navigationlab.data.remote.RetrofitClient
+import com.example.navigationlab.data.remote.StudentRemoteDataSource
 import com.example.navigationlab.data.repository.DefaultStudentRepository
-import com.example.navigationlab.data.source.StudentLocalDataSource
 import com.example.navigationlab.ui.detail.DetailViewModel
 import com.example.navigationlab.ui.home.HomeViewModel
 import com.example.navigationlab.ui.screen.AboutScreen
@@ -20,8 +21,13 @@ import com.example.navigationlab.ui.screen.ProfileScreen
 
 @Composable
 fun NavigationLabApp() {
-    val dataSource = remember { StudentLocalDataSource() }
-    val repository = remember { DefaultStudentRepository(dataSource) }
+    // Dependency manual: Retrofit -> RemoteDataSource -> Repository
+    val remoteDataSource = remember {
+        StudentRemoteDataSource(RetrofitClient.apiService)
+    }
+    val repository = remember {
+        DefaultStudentRepository(remoteDataSource)
+    }
 
     val navController = rememberNavController()
 
@@ -35,7 +41,10 @@ fun NavigationLabApp() {
             )
             HomeScreen(
                 uiState = homeViewModel.uiState,
-                onOpenDetail = { id -> navController.navigate(Routes.detail(id)) },
+                onQueryChange = homeViewModel::onQueryChange,
+                onSearch = homeViewModel::search,
+                onStudentClick = { id -> navController.navigate(Routes.detail(id)) },
+                onRetry = homeViewModel::search,
                 onOpenProfile = { navController.navigate(Routes.PROFILE) },
                 onOpenAbout = { navController.navigate(Routes.ABOUT) }
             )

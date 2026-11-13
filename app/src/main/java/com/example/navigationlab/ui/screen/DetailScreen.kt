@@ -1,6 +1,7 @@
 package com.example.navigationlab.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,10 +9,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,6 +37,17 @@ fun DetailScreen(
             val error = uiState.errorMessage
 
             when {
+                uiState.isLoading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
                 error != null -> {
                     ElevatedCard(
                         modifier = Modifier.fillMaxWidth(),
@@ -55,19 +69,19 @@ fun DetailScreen(
                             modifier = Modifier.padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            InfoRow(label = "ID", value = student.id.toString())
-                            InfoRow(label = "Nama", value = student.name)
-                            InfoRow(label = "Program", value = student.program)
-                            InfoRow(label = "Angkatan", value = student.year.toString())
+                            Text(
+                                text = student.name,
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                            InfoRow("ID", student.id.toString())
+                            InfoRow("Email", student.email)
+                            InfoRow("University", student.university)
                         }
                     }
                 }
             }
 
-            Button(
-                onClick = onBack,
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
                 Text("Kembali")
             }
         }
