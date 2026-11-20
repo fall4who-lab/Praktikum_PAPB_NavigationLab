@@ -2,7 +2,9 @@ package com.example.navigationlab.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -21,7 +23,6 @@ import com.example.navigationlab.ui.screen.ProfileScreen
 
 @Composable
 fun NavigationLabApp() {
-    // Dependency manual: Retrofit -> RemoteDataSource -> Repository
     val remoteDataSource = remember {
         StudentRemoteDataSource(RetrofitClient.apiService)
     }
@@ -39,12 +40,16 @@ fun NavigationLabApp() {
             val homeViewModel: HomeViewModel = viewModel(
                 factory = HomeViewModel.factory(repository)
             )
+            val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
+            val searchQuery by homeViewModel.searchQuery.collectAsStateWithLifecycle()
+
             HomeScreen(
-                uiState = homeViewModel.uiState,
-                onQueryChange = homeViewModel::onQueryChange,
-                onSearch = homeViewModel::search,
+                uiState = uiState,
+                searchQuery = searchQuery,
+                onSearchQueryChange = homeViewModel::onSearchQueryChange,
                 onStudentClick = { id -> navController.navigate(Routes.detail(id)) },
-                onRetry = homeViewModel::search,
+                onRetry = homeViewModel::retry,
+                onRefresh = homeViewModel::refresh,
                 onOpenProfile = { navController.navigate(Routes.PROFILE) },
                 onOpenAbout = { navController.navigate(Routes.ABOUT) }
             )
@@ -60,13 +65,14 @@ fun NavigationLabApp() {
             val viewModel: DetailViewModel = viewModel(
                 factory = DetailViewModel.factory(repository)
             )
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
             LaunchedEffect(studentId) {
                 viewModel.loadStudent(studentId)
             }
 
             DetailScreen(
-                uiState = viewModel.uiState,
+                uiState = uiState,
                 onBack = { navController.popBackStack() }
             )
         }

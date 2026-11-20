@@ -31,10 +31,11 @@ import com.example.navigationlab.ui.home.HomeUiState
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
-    onQueryChange: (String) -> Unit,
-    onSearch: () -> Unit,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
     onStudentClick: (Int) -> Unit,
     onRetry: () -> Unit,
+    onRefresh: () -> Unit,
     onOpenProfile: () -> Unit,
     onOpenAbout: () -> Unit
 ) {
@@ -46,22 +47,26 @@ fun HomeScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Kolom pencarian + tombol Cari
+            // Kolom pencarian reaktif + tombol Refresh
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
-                    value = uiState.searchQuery,
-                    onValueChange = onQueryChange,
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
                     modifier = Modifier.weight(1f),
-                    label = { Text("Cari mahasiswa") },
+                    label = { Text("Cari profil") },
                     singleLine = true
                 )
-                Button(onClick = onSearch) { Text("Cari") }
+                Button(
+                    onClick = onRefresh,
+                    enabled = !uiState.isLoading
+                ) { Text("Refresh") }
             }
 
+            // Area konten: loading / error / kosong / daftar
             Box(
                 modifier = Modifier
                     .weight(1f)
